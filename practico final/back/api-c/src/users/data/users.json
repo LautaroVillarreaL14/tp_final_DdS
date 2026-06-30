@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  {
+    "id": "2",
+    "name": "Jane Doe",
+    "email": "jane@example.com"
+  },
+  {
+    "id": "3",
+    "email": "alice@example.com",
+    "password": "$2b$10$vO/jEtwzKqrAd9VtaK9rQOzPCeIaecw55h/iu5BKjiAGVBz5emvTe",
+    "emailVerified": true
+  }
+]

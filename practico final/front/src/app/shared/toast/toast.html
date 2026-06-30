@@ -1,0 +1,20 @@
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+  @for (t of toasts.messages(); track t.id) {
+    <div class="toast show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        @if (t.type === 'success') {
+          <strong class="me-auto text-success">Éxito</strong>
+        } @else if (t.type === 'error') {
+          <strong class="me-auto text-danger">Error</strong>
+        } @else {
+          <strong class="me-auto">Info</strong>
+        }
+        <small class="text-muted">ahora</small>
+        <button type="button" class="btn-close ms-2 mb-1" aria-label="Close" (click)="toasts.remove(t.id)"></button>
+      </div>
+      <div class="toast-body">
+        {{ t.text }}
+      </div>
+    </div>
+  }
+</div>

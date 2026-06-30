@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "api-productos": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "powershell",
+        "-Command",
+        "$env:API_C_URL='http://localhost:3000'; $env:API_C_EMAIL='admin@mail.com'; $env:API_C_PASSWORD='12345678'; npx tsx mcp/src/index.ts"
+      ]
+    }
+  }
+}
