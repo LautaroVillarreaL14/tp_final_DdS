@@ -20,8 +20,9 @@ let CategoriesController = class CategoriesController {
     constructor(categoriesService) {
         this.categoriesService = categoriesService;
     }
-    findAll(page = 1, limit = 50) {
-        return this.categoriesService.findAll(page, limit);
+    async findAll(page = 1, limit = 50) {
+        const result = await this.categoriesService.findAll(page, limit);
+        return result.data;
     }
     finOne(id) {
         return this.categoriesService.findById(+id);

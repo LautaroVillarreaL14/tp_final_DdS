@@ -13,13 +13,14 @@ const app_service_1 = require("./app.service");
 const products_module_1 = require("./products/products.module");
 const users_module_1 = require("./users/users.module");
 const auth_module_1 = require("./auth/auth.module");
+const categories_module_1 = require("./categories/categories.module");
 const typeorm_1 = require("@nestjs/typeorm");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [products_module_1.ProductsModule, users_module_1.UsersModule, auth_module_1.AuthModule, typeorm_1.TypeOrmModule.forRoot({
+        imports: [products_module_1.ProductsModule, users_module_1.UsersModule, auth_module_1.AuthModule, categories_module_1.CategoriesModule, typeorm_1.TypeOrmModule.forRoot({
                 type: 'better-sqlite3',
                 database: 'db_sqlite.sqlite',
                 autoLoadEntities: true,

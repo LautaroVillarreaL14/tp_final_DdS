@@ -23,8 +23,9 @@ export class CategoriesController{
     constructor(private readonly categoriesService: CategoriesService) {}
 
     @Get()
-    findAll(@Query('page')page:number=1, @Query('limit')limit:number=50): Promise<PaginationResponse<Category>>{
-        return this.categoriesService.findAll(page,limit);
+    async findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 50): Promise<any> {
+        const result = await this.categoriesService.findAll(page, limit);
+        return result.data;
     }
     
     @Get(':id')

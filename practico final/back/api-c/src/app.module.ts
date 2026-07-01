@@ -4,10 +4,11 @@ import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CategoriesModule } from './categories/categories.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [ProductsModule, UsersModule, AuthModule, TypeOrmModule.forRoot({
+  imports: [ProductsModule, UsersModule, AuthModule, CategoriesModule, TypeOrmModule.forRoot({
     type: 'better-sqlite3',
     database: 'db_sqlite.sqlite',
     autoLoadEntities: true,
