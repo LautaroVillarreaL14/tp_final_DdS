@@ -17,6 +17,9 @@ export class UserEntity {
   @Column({ nullable: true })
   password: string;
 
+  @Column({ default: 'user' })
+  role: string;
+
   @Column({ default: false })
   emailVerified: boolean;
 

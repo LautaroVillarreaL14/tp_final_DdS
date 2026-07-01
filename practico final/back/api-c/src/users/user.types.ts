@@ -4,6 +4,7 @@ export type ExternalUser = {
   username?: string;
   email: string;
   password?: string;
+  role?: string;
   emailVerified?: boolean;
   isVerified?: boolean;
   verificationToken?: string | null;

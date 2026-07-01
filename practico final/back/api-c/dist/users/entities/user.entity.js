@@ -17,6 +17,7 @@ let UserEntity = class UserEntity {
     name;
     username;
     password;
+    role;
     emailVerified;
     isVerified;
     verificationToken;
@@ -45,6 +46,10 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], UserEntity.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 'user' }),
+    __metadata("design:type", String)
+], UserEntity.prototype, "role", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
