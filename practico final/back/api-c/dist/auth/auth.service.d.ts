@@ -10,6 +10,7 @@ export declare class AuthService {
             id: any;
             email: any;
             emailVerified: any;
+            isVerified: any;
         };
     }>;
     private safeUser;

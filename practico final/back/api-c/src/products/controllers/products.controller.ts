@@ -4,23 +4,28 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
+  Headers,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Put,
   Query,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ProductsService } from '../services/products.service';
 import { Product } from '../product.types';
 import { CreateProductInput } from '../DTOs/create.product.input';
 import { UpdateProductInput } from '../DTOs/update.product.input';
-//import { LimitOnUpdateNotSupportedError, NumericType } from 'typeorm';
-import { PaginationResponse } from '../../common/types/pagination.types';
+import { AuthService } from '../../auth/auth.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Get()
   async findAll(
@@ -41,18 +46,21 @@ export class ProductsController {
     return this.productsService.findOne(Number(id));
   }
 
-  @Post()//Listo
-  create(@Body() body: CreateProductInput): Promise<Product> {
+  @Post()
+  async create(@Body() body: CreateProductInput, @Headers('authorization') auth?: string): Promise<Product> {
+    await this.requireAdmin(auth);
     return this.productsService.create(body);
   }
 
-  @Put(':id')//Haciendo
-  update(@Param('id') id: string, @Body() body: UpdateProductInput): Promise<Product> {
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() body: UpdateProductInput, @Headers('authorization') auth?: string): Promise<Product> {
+    await this.requireAdmin(auth);
     return this.productsService.update(Number(id), body);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<Product> {
+  async remove(@Param('id') id: string, @Headers('authorization') auth?: string): Promise<Product> {
+    await this.requireAdmin(auth);
     return this.productsService.remove(Number(id));
   }
 
@@ -61,7 +69,18 @@ export class ProductsController {
     return this.productsService.updateStock(id,stock);
   }
 
-  
+  private async requireUser(auth?: string) {
+    const token = auth?.replace(/^Bearer\s+/i, '');
+    if (!token) throw new UnauthorizedException('Missing token');
+    const user = await this.authService.meFromToken(token);
+    if (!user) throw new UnauthorizedException('Invalid token');
+    return user;
+  }
 
+  private async requireAdmin(auth?: string) {
+    const user = await this.requireUser(auth);
+    if (user.role !== 'admin') throw new ForbiddenException('Admin privilege required');
+    return user;
+  }
 }
 

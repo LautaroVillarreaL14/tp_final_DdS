@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserToken } from './entities/user-token.entity';
@@ -20,13 +20,13 @@ export class AuthService {
     if (existing) throw new BadRequestException('Email already registered');
 
     const hashed = await bcrypt.hash(password, 10);
-    const created = await this.usersService.create({ email, password: hashed, emailVerified: false });
+    const created = await this.usersService.create({ email, password: hashed, emailVerified: false, isVerified: false });
     if (!created) throw new BadRequestException('Unable to create user');
 
     await this.sendVerificationEmail((created as any).id, (created as any).email);
 
     const token = this.signToken((created as any).id as any);
-    return { access_token: token, user: { id: (created as any).id, email: (created as any).email, emailVerified: (created as any).emailVerified } };
+    return { access_token: token, user: { id: (created as any).id, email: (created as any).email, emailVerified: (created as any).emailVerified, isVerified: (created as any).isVerified } };
   }
 
   private safeUser(user: any) {
@@ -36,12 +36,12 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const ok = await bcrypt.compare(password, (user as any).password || '');
-    if (!ok) throw new BadRequestException('Invalid credentials');
+    if (!ok) throw new UnauthorizedException('Invalid credentials');
 
-    if (!(user as any).emailVerified) throw new BadRequestException('Email not verified');
+    if (!(user as any).emailVerified) throw new UnauthorizedException('Email not verified');
 
     const token = this.signToken(user.id as any);
     return { access_token: token, user: this.safeUser(user) };
@@ -55,10 +55,10 @@ export class AuthService {
     try {
       const payload: any = jwt.verify(token, this.jwtSecret);
       const user = await this.usersService.findOne(payload.sub);
-      if (!user) throw new NotFoundException('User not found');
+      if (!user) throw new UnauthorizedException('Invalid token');
       return this.safeUser(user);
     } catch (err) {
-      throw new BadRequestException('Invalid token');
+      throw new UnauthorizedException('Invalid token');
     }
   }
 
@@ -96,15 +96,13 @@ export class AuthService {
     if (tokenOrEmail && tokenOrEmail.includes && tokenOrEmail.includes('@')) {
       const userByEmail = await this.usersService.findByEmail(tokenOrEmail);
       if (!userByEmail) throw new NotFoundException('User not found');
-      if ((userByEmail as any).isVerified || (userByEmail as any).emailVerified) throw new BadRequestException('Email already verified');
       await this.sendVerificationEmail((userByEmail as any).id, userByEmail.email);
       return;
     }
 
     // Otherwise, assume a JWT token was provided
     const user = await this.meFromToken(tokenOrEmail);
-    if (!user) throw new BadRequestException('Usuario inválido');
-    if (user.isVerified || user.emailVerified) throw new BadRequestException('Email already verified');
+    if (!user) throw new UnauthorizedException('Usuario inválido');
     await this.sendVerificationEmail(user.id, user.email);
   }
 

@@ -28,28 +28,38 @@ let ProductsService = class ProductsService {
         const product = await this.productsRepository.findById(id);
         if (!product)
             throw new common_1.NotFoundException('Product not found');
-        return product;
+        return this.enrichProduct(product);
     }
     async create(input) {
-        return this.productsRepository.create(input);
+        const created = await this.productsRepository.create(input);
+        return this.enrichProduct(created);
     }
     async update(id, input) {
         const product = await this.productsRepository.update(id, input);
         if (!product)
             throw new common_1.NotFoundException('Product not found');
-        return product;
+        return this.enrichProduct(product);
     }
     async remove(id) {
         const product = await this.productsRepository.remove(id);
         if (!product)
             throw new common_1.NotFoundException('Product not found');
-        return product;
+        return this.enrichProduct(product);
     }
     async partialUpdate(id, data) {
-        return this.productsRepository.partialUpdate(id, data);
+        const result = await this.productsRepository.partialUpdate(id, data);
+        return result ? this.enrichProduct(result) : undefined;
     }
     async updateStock(id, stock) {
-        return this.productsRepository.updateStock(id, stock);
+        const result = await this.productsRepository.updateStock(id, stock);
+        return result ? this.enrichProduct(result) : undefined;
+    }
+    enrichProduct(product) {
+        const categoryId = product.categoryId ?? 1;
+        return {
+            ...product,
+            category: categoryId ? { id: categoryId, name: `Category ${categoryId}` } : null,
+        };
     }
 };
 exports.ProductsService = ProductsService;

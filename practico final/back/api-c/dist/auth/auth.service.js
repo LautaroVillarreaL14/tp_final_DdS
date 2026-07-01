@@ -28,12 +28,12 @@ let AuthService = class AuthService {
         if (existing)
             throw new common_1.BadRequestException('Email already registered');
         const hashed = await bcrypt.hash(password, 10);
-        const created = await this.usersService.create({ email, password: hashed, emailVerified: false });
+        const created = await this.usersService.create({ email, password: hashed, emailVerified: false, isVerified: false });
         if (!created)
             throw new common_1.BadRequestException('Unable to create user');
         await this.sendVerificationEmail(created.id, created.email);
         const token = this.signToken(created.id);
-        return { access_token: token, user: { id: created.id, email: created.email, emailVerified: created.emailVerified } };
+        return { access_token: token, user: { id: created.id, email: created.email, emailVerified: created.emailVerified, isVerified: created.isVerified } };
     }
     safeUser(user) {
         const { password, ...rest } = user;
@@ -42,12 +42,12 @@ let AuthService = class AuthService {
     async login(email, password) {
         const user = await this.usersService.findByEmail(email);
         if (!user)
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.UnauthorizedException('Invalid credentials');
         const ok = await bcrypt.compare(password, user.password || '');
         if (!ok)
-            throw new common_1.BadRequestException('Invalid credentials');
+            throw new common_1.UnauthorizedException('Invalid credentials');
         if (!user.emailVerified)
-            throw new common_1.BadRequestException('Email not verified');
+            throw new common_1.UnauthorizedException('Email not verified');
         const token = this.signToken(user.id);
         return { access_token: token, user: this.safeUser(user) };
     }
@@ -59,11 +59,11 @@ let AuthService = class AuthService {
             const payload = jwt.verify(token, this.jwtSecret);
             const user = await this.usersService.findOne(payload.sub);
             if (!user)
-                throw new common_1.NotFoundException('User not found');
+                throw new common_1.UnauthorizedException('Invalid token');
             return this.safeUser(user);
         }
         catch (err) {
-            throw new common_1.BadRequestException('Invalid token');
+            throw new common_1.UnauthorizedException('Invalid token');
         }
     }
     async sendVerificationEmail(userId, email) {
@@ -96,16 +96,12 @@ let AuthService = class AuthService {
             const userByEmail = await this.usersService.findByEmail(tokenOrEmail);
             if (!userByEmail)
                 throw new common_1.NotFoundException('User not found');
-            if (userByEmail.isVerified || userByEmail.emailVerified)
-                throw new common_1.BadRequestException('Email already verified');
             await this.sendVerificationEmail(userByEmail.id, userByEmail.email);
             return;
         }
         const user = await this.meFromToken(tokenOrEmail);
         if (!user)
-            throw new common_1.BadRequestException('Usuario inválido');
-        if (user.isVerified || user.emailVerified)
-            throw new common_1.BadRequestException('Email already verified');
+            throw new common_1.UnauthorizedException('Usuario inválido');
         await this.sendVerificationEmail(user.id, user.email);
     }
     async requestPasswordReset(email) {

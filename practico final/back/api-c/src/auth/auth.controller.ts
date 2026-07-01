@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Headers, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Headers, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -24,7 +24,7 @@ export class AuthController {
   @Get('me')
   async me(@Headers('authorization') auth?: string) {
     const token = auth?.replace(/^Bearer\s+/i, '');
-    if (!token) return null;
+    if (!token) throw new UnauthorizedException('Missing token');
     return this.auth.meFromToken(token);
   }
 
@@ -44,7 +44,7 @@ export class AuthController {
       await this.auth.resendVerification(body.email);
       return { message: 'Email reenviado' };
     }
-    throw new BadRequestException('Missing token or email');
+    throw new UnauthorizedException('Missing token or email');
   }
 
   @Post('forgot-password')

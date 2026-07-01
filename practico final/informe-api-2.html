@@ -1,0 +1,1037 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Informe API — 2026-07-01T04:08:13.428Z</title><style>
+    :root {
+      --bg: #eef1f6;
+      --surface: #ffffff;
+      --text: #1a2332;
+      --muted: #5c6b7a;
+      --line: #dde3ea;
+      --accent: #2563eb;
+      --ok: #059669;
+      --ok-bg: #ecfdf5;
+      --fail: #dc2626;
+      --fail-bg: #fef2f2;
+      --warn: #d97706;
+      --warn-bg: #fffbeb;
+      --skip: #64748b;
+      --skip-bg: #f8fafc;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, #dfe8f5 0%, var(--bg) 220px);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #2563eb 100%);
+      color: #fff;
+      padding: 2rem 1.5rem 2.5rem;
+    }
+    .hero-inner, .container { max-width: 1200px; margin: 0 auto; }
+    .hero h1 { margin: 0 0 0.35rem; font-size: 1.65rem; font-weight: 700; }
+    .hero p { margin: 0; color: rgba(255,255,255,0.82); font-size: 0.92rem; }
+    .container { padding: 0 1.5rem 3rem; margin-top: -1.25rem; }
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-header h2 { margin: 0; font-size: 1.05rem; }
+    .panel-header p { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.88rem; }
+    .panel-body { padding: 1.25rem; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-family: inherit;
+    }
+    input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
+    .btn {
+      padding: 0.65rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--line); }
+    .notice {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      font-size: 0.85rem;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 0.75rem;
+      display: none;
+    }
+    .progress-bar.active { display: block; }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #06b6d4);
+      transition: width 0.25s ease;
+    }
+    .status-line { margin-top: 0.75rem; font-size: 0.88rem; color: var(--muted); min-height: 1.3em; }
+    #report { display: none; }
+    #report.visible { display: block; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+    }
+    .stat-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .stat-card .value { font-size: 1.75rem; font-weight: 700; margin-top: 0.15rem; }
+    .stat-card.ok .value { color: var(--ok); }
+    .stat-card.fail .value { color: var(--fail); }
+    .stat-card.warn .value { color: var(--warn); }
+    .stat-card.skip .value { color: var(--skip); }
+    .stat-card.pct .value { color: var(--accent); }
+    .verdict {
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .verdict.pass { background: var(--ok-bg); color: var(--ok); }
+    .verdict.fail { background: var(--fail-bg); color: var(--fail); }
+    .group-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .group-header {
+      padding: 0.9rem 1.15rem;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+    }
+    .group-header h3 { margin: 0; font-size: 0.98rem; }
+    .group-header p { margin: 0.15rem 0 0; color: var(--muted); font-size: 0.82rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { padding: 0.7rem 1rem; text-align: left; vertical-align: top; border-top: 1px solid var(--line); }
+    thead th {
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-top: none;
+    }
+    tbody tr:hover { background: #fafbfd; }
+    .row-fail { background: #fffafa; }
+    .row-warn { background: #fffdf7; }
+    .col-time { white-space: nowrap; width: 72px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .col-test { min-width: 200px; font-weight: 500; }
+    .col-io { min-width: 160px; max-width: 280px; }
+    .mono {
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", monospace;
+      font-size: 0.78rem;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge-ok, .badge-http-2xx { background: var(--ok-bg); color: var(--ok); }
+    .badge-fail, .badge-http-5xx { background: var(--fail-bg); color: var(--fail); }
+    .badge-warn, .badge-http-4xx { background: var(--warn-bg); color: var(--warn); }
+    .badge-skip, .badge-http-3xx { background: var(--skip-bg); color: var(--skip); }
+    .suggestion {
+      margin-top: 0.3rem;
+      padding: 0.4rem 0.55rem;
+      border-radius: 8px;
+      background: var(--warn-bg);
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: 0.78rem;
+    }
+    .error-line {
+      margin-top: 0.3rem;
+      padding: 0.4rem 0.55rem;
+      border-radius: 8px;
+      background: var(--fail-bg);
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-size: 0.78rem;
+    }
+    .method {
+      display: inline-block;
+      padding: 0.12rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+    }
+    .method-get { background: #dbeafe; color: #1d4ed8; }
+    .method-post { background: #dcfce7; color: #15803d; }
+    .method-put { background: #fef3c7; color: #b45309; }
+    .method-patch { background: #f3e8ff; color: #7e22ce; }
+    .method-delete { background: #fee2e2; color: #b91c1c; }
+    .panel-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-tutorial {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 0.45rem 0.9rem;
+      font-size: 0.82rem;
+    }
+    .btn-tutorial:hover { background: rgba(255,255,255,0.2); }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      width: min(100%, 420px);
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.15rem;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+    .modal-head h2 { margin: 0; font-size: 1rem; }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.35rem;
+      line-height: 1;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.15rem 0.35rem;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 1.5rem 1.25rem 1.25rem; min-height: 140px; }
+    .step-counter {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .step-title {
+      margin: 0 0 0.5rem;
+      font-size: 1.15rem;
+      line-height: 1.35;
+    }
+    .step-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .step-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0 1.25rem 0.75rem;
+    }
+    .step-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .step-dot.active { background: var(--accent); transform: scale(1.15); }
+    .modal-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1.15rem 1.15rem;
+      border-top: 1px solid var(--line);
+    }
+    .modal-foot .btn { flex: 1; }
+    @media (max-width: 768px) {
+      .hero { padding: 1.5rem 1rem 2rem; }
+      .container { padding: 0 1rem 2rem; }
+    }
+  </style></head><body><header class="hero"><div class="hero-inner"><h1>Práctico Final — Informe de corrección API</h1><p>Generado desde test-api.html · 1/7/2026, 01:08:12 → 1/7/2026, 01:08:13</p></div></header><main class="container">
+      <div class="summary-grid">
+        <div class="stat-card ok"><div class="label">Aprobados</div><div class="value">32</div></div>
+        <div class="stat-card fail"><div class="label">Fallidos</div><div class="value">2</div></div>
+        <div class="stat-card warn"><div class="label">Con sugerencia</div><div class="value">0</div></div>
+        <div class="stat-card skip"><div class="label">Omitidos</div><div class="value">2</div></div>
+        <div class="stat-card pct"><div class="label">Porcentaje</div><div class="value">94%</div></div>
+      </div>
+
+      <section class="panel">
+        <div class="panel-header panel-header-flex">
+          <div>
+            <h2>Resumen general</h2>
+            <p>32/34 tests OK · 2 omitidos</p>
+          </div>
+          <span class="verdict fail">2 test(s) fallidos</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <tbody><tr><th style="width:140px;color:var(--muted)">API_URL</th><td>http://localhost:3000</td></tr><tr><th style="width:140px;color:var(--muted)">ADMIN</th><td>lautarovillarreal2018@gmail.com</td></tr><tr><th style="width:140px;color:var(--muted)">USER</th><td>lautaro2006villarreal@gmail.com</td></tr><tr><th style="width:140px;color:var(--muted)">MODO</th><td>login (usuarios existentes)</td></tr><tr><th style="width:140px;color:var(--muted)">runId</th><td>mr1k25gfgs25</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      
+        <section class="group-card">
+          <header class="group-header">
+            <h3>Verificación email</h3>
+            <p>3 OK · 1 FAIL · 6 tests</p>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Hora</th><th>Test</th><th>Estado</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody>
+        <tr class="row-skip">
+          <td class="col-time">—</td>
+          <td class="col-test">Llega email y se extrae token</td>
+          <td><span class="badge badge-skip">SKIP</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">omitido: modo credenciales (no lee IMAP)</div></td>
+        </tr>
+        <tr class="row-skip">
+          <td class="col-time">—</td>
+          <td class="col-test">POST /auth/verify-email con token válido → 200</td>
+          <td><span class="badge badge-skip">SKIP</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">omitido: user ya verificado</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /auth/me isVerified=true (user ya validado)</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /auth/verify-email token inválido → 400</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-fail">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /auth/resend-verification con JWT → 200</td>
+          <td><span class="badge badge-fail">FAIL</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="error-line">resend-verification: HTTP 400, esperado 200 o 201</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /auth/resend-verification sin JWT → 401</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="group-card">
+          <header class="group-header">
+            <h3>Auth</h3>
+            <p>5 OK · 0 FAIL · 5 tests</p>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Hora</th><th>Test</th><th>Estado</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /auth/login con credenciales válidas → 201</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /auth/login credenciales inválidas → 401</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /auth/me con JWT → 200 + campos requeridos</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /auth/me sin token → 401</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /auth/me token inválido → 401</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="group-card">
+          <header class="group-header">
+            <h3>Categories</h3>
+            <p>9 OK · 0 FAIL · 9 tests</p>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Hora</th><th>Test</th><th>Estado</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /categories como admin → 201</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /categories como user → 403</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /categories con JWT → 200 array</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /categories sin JWT → 401</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /categories/:id → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /categories/:id inexistente → 404</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">PUT /categories/:id como admin → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">PUT /categories/:id como user → 403</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /categories nombre duplicado → 409</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="group-card">
+          <header class="group-header">
+            <h3>Products</h3>
+            <p>9 OK · 1 FAIL · 10 tests</p>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Hora</th><th>Test</th><th>Estado</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /products como admin → 201</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-fail">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">POST /products como user → 403</td>
+          <td><span class="badge badge-fail">FAIL</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="error-line">create product user: HTTP 400, esperado 403</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /products paginado → 200 + items/total/page/limit</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /products?name= filtra por nombre</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /products/:id → 200 con category</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">GET /products/:id inexistente → 404</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">PUT /products/:id como admin → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:12</td>
+          <td class="col-test">PUT /products/:id como user → 403</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">DELETE /products/:id como user → 403</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">DELETE /products/:id como admin → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="group-card">
+          <header class="group-header">
+            <h3>Users (admin)</h3>
+            <p>4 OK · 0 FAIL · 4 tests</p>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Hora</th><th>Test</th><th>Estado</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">GET /users como admin → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">GET /users como user → 403</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">PATCH /users/:id/role promueve a admin → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">PATCH /users/:id/role propio usuario → 403</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="group-card">
+          <header class="group-header">
+            <h3>Categories cleanup</h3>
+            <p>1 OK · 0 FAIL · 1 tests</p>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Hora</th><th>Test</th><th>Estado</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">DELETE /categories/:id como admin → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="group-card">
+          <header class="group-header">
+            <h3>Products cleanup</h3>
+            <p>1 OK · 0 FAIL · 1 tests</p>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Hora</th><th>Test</th><th>Estado</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody>
+        <tr class="row-ok">
+          <td class="col-time">01:08:13</td>
+          <td class="col-test">DELETE /products/:id principal → 200</td>
+          <td><span class="badge badge-ok">OK</span></td>
+          <td class="col-io"><div class="mono">—</div></td>
+          <td class="col-io"><div class="mono">—</div></td>
+        </tr></tbody>
+            </table>
+          </div>
+        </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Requests HTTP</h2>
+          <p>41 intercambios registrados</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Hora</th><th>Método</th><th>URL</th><th>Request body</th><th>Status</th><th>Response body</th></tr>
+            </thead>
+            <tbody>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/login</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;email&quot;: &quot;lautarovillarreal2018@gmail.com&quot;,</div><div class="mono">  &quot;password&quot;: &quot;12345678&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;access_token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTc4Mjg3ODg5MiwiZXhwIjoxNzgzNDgzNjkyfQ.6ahvdJb6mwgKMptmfVVtMiRbN7i-i-DnZhFg0KP-s2s&quot;,</div><div class="mono">  &quot;user&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;email&quot;: &quot;lautarovillarreal2018@gmail.com&quot;,</div><div class="mono">    &quot;name&quot;: null,</div><div class="mono">    &quot;username&quot;: null,</div><div class="mono">    &quot;role&quot;: &quot;admin&quot;,</div><div class="mono">    &quot;emailVerified&quot;: true,</div><div class="mono">    &quot;isVerified&quot;: true,</div><div class="mono">    &quot;verificationToken&quot;: null,</div><div class="mono">    &quot;resetPasswordToken&quot;: null,</div><div class="mono">    &quot;resetPasswordExpires&quot;: null,</div><div class="mono">    &quot;verificationTokenExpires&quot;: null,</div><div class="mono">    &quot;createdAt&quot;: &quot;2026-07-01T03:48:42.000Z&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/login</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">  &quot;password&quot;: &quot;12345678&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;access_token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImlhdCI6MTc4Mjg3ODg5MiwiZXhwIjoxNzgzNDgzNjkyfQ.Z4T8Dv1rbMorqziEXZslxfsatcF6ZIV1l8v9KPBQv3U&quot;,</div><div class="mono">  &quot;user&quot;: {</div><div class="mono">    &quot;id&quot;: 2,</div><div class="mono">    &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">    &quot;name&quot;: null,</div><div class="mono">    &quot;username&quot;: null,</div><div class="mono">    &quot;role&quot;: &quot;user&quot;,</div><div class="mono">    &quot;emailVerified&quot;: true,</div><div class="mono">    &quot;isVerified&quot;: true,</div><div class="mono">    &quot;verificationToken&quot;: null,</div><div class="mono">    &quot;resetPasswordToken&quot;: null,</div><div class="mono">    &quot;resetPasswordExpires&quot;: null,</div><div class="mono">    &quot;verificationTokenExpires&quot;: null,</div><div class="mono">    &quot;createdAt&quot;: &quot;2026-07-01T03:50:23.000Z&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/me</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 2,</div><div class="mono">  &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">  &quot;name&quot;: null,</div><div class="mono">  &quot;username&quot;: null,</div><div class="mono">  &quot;role&quot;: &quot;user&quot;,</div><div class="mono">  &quot;emailVerified&quot;: true,</div><div class="mono">  &quot;isVerified&quot;: true,</div><div class="mono">  &quot;createdAt&quot;: &quot;2026-07-01T03:50:23.000Z&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/login</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">  &quot;password&quot;: &quot;12345678&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;access_token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImlhdCI6MTc4Mjg3ODg5MiwiZXhwIjoxNzgzNDgzNjkyfQ.Z4T8Dv1rbMorqziEXZslxfsatcF6ZIV1l8v9KPBQv3U&quot;,</div><div class="mono">  &quot;user&quot;: {</div><div class="mono">    &quot;id&quot;: 2,</div><div class="mono">    &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">    &quot;name&quot;: null,</div><div class="mono">    &quot;username&quot;: null,</div><div class="mono">    &quot;role&quot;: &quot;user&quot;,</div><div class="mono">    &quot;emailVerified&quot;: true,</div><div class="mono">    &quot;isVerified&quot;: true,</div><div class="mono">    &quot;verificationToken&quot;: null,</div><div class="mono">    &quot;resetPasswordToken&quot;: null,</div><div class="mono">    &quot;resetPasswordExpires&quot;: null,</div><div class="mono">    &quot;verificationTokenExpires&quot;: null,</div><div class="mono">    &quot;createdAt&quot;: &quot;2026-07-01T03:50:23.000Z&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/login</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">  &quot;password&quot;: &quot;wrong-password&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">401</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Invalid credentials&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Unauthorized&quot;,</div><div class="mono">  &quot;statusCode&quot;: 401</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/me</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 2,</div><div class="mono">  &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">  &quot;name&quot;: null,</div><div class="mono">  &quot;username&quot;: null,</div><div class="mono">  &quot;role&quot;: &quot;user&quot;,</div><div class="mono">  &quot;emailVerified&quot;: true,</div><div class="mono">  &quot;isVerified&quot;: true,</div><div class="mono">  &quot;createdAt&quot;: &quot;2026-07-01T03:50:23.000Z&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/me</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">401</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Missing token&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Unauthorized&quot;,</div><div class="mono">  &quot;statusCode&quot;: 401</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/me</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">401</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Invalid token&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Unauthorized&quot;,</div><div class="mono">  &quot;statusCode&quot;: 401</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/me</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 2,</div><div class="mono">  &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">  &quot;name&quot;: null,</div><div class="mono">  &quot;username&quot;: null,</div><div class="mono">  &quot;role&quot;: &quot;user&quot;,</div><div class="mono">  &quot;emailVerified&quot;: true,</div><div class="mono">  &quot;isVerified&quot;: true,</div><div class="mono">  &quot;createdAt&quot;: &quot;2026-07-01T03:50:23.000Z&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/verify-email</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;token&quot;: &quot;00000000-0000-0000-0000-000000000000&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">400</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Token inválido o expirado&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Bad Request&quot;,</div><div class="mono">  &quot;statusCode&quot;: 400</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/resend-verification</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">400</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Email already verified&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Bad Request&quot;,</div><div class="mono">  &quot;statusCode&quot;: 400</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/auth/resend-verification</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">401</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Missing token or email&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Unauthorized&quot;,</div><div class="mono">  &quot;statusCode&quot;: 401</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Electrónica-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 1,</div><div class="mono">  &quot;name&quot;: &quot;Electrónica-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;NoPermitido&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">403</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Admin privilege required&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Forbidden&quot;,</div><div class="mono">  &quot;statusCode&quot;: 403</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">[</div><div class="mono">  {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Electrónica-mr1k25gfgs25&quot;</div><div class="mono">  }</div><div class="mono">]</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">401</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Missing token&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Unauthorized&quot;,</div><div class="mono">  &quot;statusCode&quot;: 401</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories/1</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 1,</div><div class="mono">  &quot;name&quot;: &quot;Electrónica-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories/999999</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">404</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Category not found&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Not Found&quot;,</div><div class="mono">  &quot;statusCode&quot;: 404</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-put">PUT</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories/1</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Electrónica-upd-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 1,</div><div class="mono">  &quot;name&quot;: &quot;Electrónica-upd-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-put">PUT</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories/1</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Hack&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">403</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Admin privilege required&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Forbidden&quot;,</div><div class="mono">  &quot;statusCode&quot;: 403</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Dup-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 2,</div><div class="mono">  &quot;name&quot;: &quot;Dup-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Dup-mr1k25gfgs25&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">409</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Category already exists&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Conflict&quot;,</div><div class="mono">  &quot;statusCode&quot;: 409</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories/2</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">—</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Teclado-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 85.99,</div><div class="mono">  &quot;stock&quot;: 25,</div><div class="mono">  &quot;categoryId&quot;: 1</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 4,</div><div class="mono">  &quot;name&quot;: &quot;Teclado-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 85.99,</div><div class="mono">  &quot;stock&quot;: 25,</div><div class="mono">  &quot;categoryId&quot;: 1,</div><div class="mono">  &quot;category&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Category 1&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;X&quot;,</div><div class="mono">  &quot;price&quot;: 10,</div><div class="mono">  &quot;categoryId&quot;: 1</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">400</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: [</div><div class="mono">    &quot;name must be longer than or equal to 2 characters&quot;,</div><div class="mono">    &quot;stock should not be empty&quot;,</div><div class="mono">    &quot;stock must not be less than 0&quot;,</div><div class="mono">    &quot;stock must be an integer number&quot;</div><div class="mono">  ],</div><div class="mono">  &quot;error&quot;: &quot;Bad Request&quot;,</div><div class="mono">  &quot;statusCode&quot;: 400</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products?page=1&amp;limit=10&amp;sortBy=price&amp;order=DESC</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;items&quot;: [</div><div class="mono">    {</div><div class="mono">      &quot;id&quot;: 1,</div><div class="mono">      &quot;name&quot;: &quot;Teclado-mr1jh1i7tlpe&quot;,</div><div class="mono">      &quot;price&quot;: 85,</div><div class="mono">      &quot;stock&quot;: 25,</div><div class="mono">      &quot;categoryId&quot;: 1</div><div class="mono">    },</div><div class="mono">    {</div><div class="mono">      &quot;id&quot;: 4,</div><div class="mono">      &quot;name&quot;: &quot;Teclado-mr1k25gfgs25&quot;,</div><div class="mono">      &quot;price&quot;: 85,</div><div class="mono">      &quot;stock&quot;: 25,</div><div class="mono">      &quot;categoryId&quot;: 1</div><div class="mono">    }</div><div class="mono">  ],</div><div class="mono">  &quot;total&quot;: 2,</div><div class="mono">  &quot;page&quot;: 1,</div><div class="mono">  &quot;limit&quot;: 10</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products?name=Teclado&amp;page=1&amp;limit=10</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;items&quot;: [</div><div class="mono">    {</div><div class="mono">      &quot;id&quot;: 1,</div><div class="mono">      &quot;name&quot;: &quot;Teclado-mr1jh1i7tlpe&quot;,</div><div class="mono">      &quot;price&quot;: 85,</div><div class="mono">      &quot;stock&quot;: 25,</div><div class="mono">      &quot;categoryId&quot;: 1</div><div class="mono">    },</div><div class="mono">    {</div><div class="mono">      &quot;id&quot;: 4,</div><div class="mono">      &quot;name&quot;: &quot;Teclado-mr1k25gfgs25&quot;,</div><div class="mono">      &quot;price&quot;: 85,</div><div class="mono">      &quot;stock&quot;: 25,</div><div class="mono">      &quot;categoryId&quot;: 1</div><div class="mono">    }</div><div class="mono">  ],</div><div class="mono">  &quot;total&quot;: 2,</div><div class="mono">  &quot;page&quot;: 1,</div><div class="mono">  &quot;limit&quot;: 10</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products/4</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 4,</div><div class="mono">  &quot;name&quot;: &quot;Teclado-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 85,</div><div class="mono">  &quot;stock&quot;: 25,</div><div class="mono">  &quot;categoryId&quot;: 1,</div><div class="mono">  &quot;category&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Category 1&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products/999999</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">404</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Product not found&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Not Found&quot;,</div><div class="mono">  &quot;statusCode&quot;: 404</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-put">PUT</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products/4</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;price&quot;: 79.99,</div><div class="mono">  &quot;stock&quot;: 30</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 4,</div><div class="mono">  &quot;price&quot;: 79.99,</div><div class="mono">  &quot;stock&quot;: 30,</div><div class="mono">  &quot;categoryId&quot;: 1,</div><div class="mono">  &quot;category&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Category 1&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:12</td>
+        <td><span class="method method-put">PUT</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products/4</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;price&quot;: 1</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">403</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Admin privilege required&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Forbidden&quot;,</div><div class="mono">  &quot;statusCode&quot;: 403</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Temp-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 99.99,</div><div class="mono">  &quot;stock&quot;: 10,</div><div class="mono">  &quot;categoryId&quot;: 1</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 5,</div><div class="mono">  &quot;name&quot;: &quot;Temp-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 99.99,</div><div class="mono">  &quot;stock&quot;: 10,</div><div class="mono">  &quot;categoryId&quot;: 1,</div><div class="mono">  &quot;category&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Category 1&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products/5</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">403</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Admin privilege required&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Forbidden&quot;,</div><div class="mono">  &quot;statusCode&quot;: 403</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-post">POST</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Del-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 99.99,</div><div class="mono">  &quot;stock&quot;: 10,</div><div class="mono">  &quot;categoryId&quot;: 1</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">201</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 6,</div><div class="mono">  &quot;name&quot;: &quot;Del-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 99.99,</div><div class="mono">  &quot;stock&quot;: 10,</div><div class="mono">  &quot;categoryId&quot;: 1,</div><div class="mono">  &quot;category&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Category 1&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products/6</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Del-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 99,</div><div class="mono">  &quot;stock&quot;: 10,</div><div class="mono">  &quot;categoryId&quot;: 1,</div><div class="mono">  &quot;category&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Category 1&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/users</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">[</div><div class="mono">  {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;email&quot;: &quot;lautarovillarreal2018@gmail.com&quot;,</div><div class="mono">    &quot;name&quot;: null,</div><div class="mono">    &quot;username&quot;: null,</div><div class="mono">    &quot;role&quot;: &quot;admin&quot;,</div><div class="mono">    &quot;emailVerified&quot;: true,</div><div class="mono">    &quot;isVerified&quot;: true,</div><div class="mono">    &quot;createdAt&quot;: &quot;2026-07-01T03:48:42.000Z&quot;</div><div class="mono">  },</div><div class="mono">  {</div><div class="mono">    &quot;id&quot;: 2,</div><div class="mono">    &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">    &quot;name&quot;: null,</div><div class="mono">    &quot;username&quot;: null,</div><div class="mono">    &quot;role&quot;: &quot;user&quot;,</div><div class="mono">    &quot;emailVerified&quot;: true,</div><div class="mono">    &quot;isVerified&quot;: true,</div><div class="mono">    &quot;createdAt&quot;: &quot;2026-07-01T03:50:23.000Z&quot;</div><div class="mono">  }</div><div class="mono">]</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-get">GET</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/users</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-4xx">403</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Admin privilege required&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Forbidden&quot;,</div><div class="mono">  &quot;statusCode&quot;: 403</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-patch">PATCH</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/users/2/role</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;role&quot;: &quot;admin&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;id&quot;: 2,</div><div class="mono">  &quot;email&quot;: &quot;lautaro2006villarreal@gmail.com&quot;,</div><div class="mono">  &quot;name&quot;: null,</div><div class="mono">  &quot;username&quot;: null,</div><div class="mono">  &quot;role&quot;: &quot;admin&quot;,</div><div class="mono">  &quot;emailVerified&quot;: true,</div><div class="mono">  &quot;isVerified&quot;: true,</div><div class="mono">  &quot;createdAt&quot;: &quot;2026-07-01T03:50:23.000Z&quot;</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-patch">PATCH</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/users/1/role</td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;role&quot;: &quot;user&quot;</div><div class="mono">}</div></td>
+        <td><span class="badge badge-http-4xx">403</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;message&quot;: &quot;Cannot change your own role&quot;,</div><div class="mono">  &quot;error&quot;: &quot;Forbidden&quot;,</div><div class="mono">  &quot;statusCode&quot;: 403</div><div class="mono">}</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/categories/1</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">—</div></td>
+      </tr>
+      <tr>
+        <td class="col-time">01:08:13</td>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="col-io" style="word-break:break-all">http://localhost:3000/products/4</td>
+        <td class="col-io"><div class="mono">—</div></td>
+        <td><span class="badge badge-http-2xx">200</span></td>
+        <td class="col-io"><div class="mono">{</div><div class="mono">  &quot;name&quot;: &quot;Teclado-mr1k25gfgs25&quot;,</div><div class="mono">  &quot;price&quot;: 79,</div><div class="mono">  &quot;stock&quot;: 30,</div><div class="mono">  &quot;categoryId&quot;: 1,</div><div class="mono">  &quot;category&quot;: {</div><div class="mono">    &quot;id&quot;: 1,</div><div class="mono">    &quot;name&quot;: &quot;Category 1&quot;</div><div class="mono">  }</div><div class="mono">}</div></td>
+      </tr></tbody>
+          </table>
+        </div>
+      </section></main></body></html>

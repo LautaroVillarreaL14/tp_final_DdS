@@ -29,12 +29,12 @@ let UsersController = class UsersController {
     async findAll(auth) {
         const token = auth?.replace(/^Bearer\s+/i, '');
         if (!token)
-            throw new common_1.BadRequestException('Missing token');
+            throw new common_1.UnauthorizedException('Missing token');
         const user = await this.authService.meFromToken(token);
         if (!user)
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.UnauthorizedException('Invalid token');
         if (user.role !== 'admin')
-            throw new common_1.BadRequestException('Admin privilege required');
+            throw new common_1.ForbiddenException('Admin privilege required');
         return this.usersService.findAll();
     }
     async findOne(id) {
@@ -46,14 +46,16 @@ let UsersController = class UsersController {
     async updateRole(id, body, auth) {
         const token = auth?.replace(/^Bearer\s+/i, '');
         if (!token)
-            throw new common_1.BadRequestException('Missing token');
+            throw new common_1.UnauthorizedException('Missing token');
         const user = await this.authService.meFromToken(token);
         if (!user)
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.UnauthorizedException('Invalid token');
         if (user.role !== 'admin')
-            throw new common_1.BadRequestException('Admin privilege required');
+            throw new common_1.ForbiddenException('Admin privilege required');
         if (!['user', 'admin'].includes(body.role))
             throw new common_1.BadRequestException('Invalid role');
+        if (+id === user.id)
+            throw new common_1.ForbiddenException('Cannot change your own role');
         const updated = await this.usersService.updateRole(+id, body.role);
         if (!updated)
             throw new common_1.NotFoundException('User not found');
@@ -62,10 +64,10 @@ let UsersController = class UsersController {
     async changePassword(body, auth) {
         const token = auth?.replace(/^Bearer\s+/i, '');
         if (!token)
-            throw new common_1.BadRequestException('Missing token');
+            throw new common_1.UnauthorizedException('Missing token');
         const user = await this.authService.meFromToken(token);
         if (!user)
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.UnauthorizedException('Invalid token');
         const res = await this.usersService.changeMyPassword(user.id, body.currentPassword, body.newPassword);
         if (res === null)
             throw new common_1.BadRequestException('Current password invalid');
@@ -74,10 +76,10 @@ let UsersController = class UsersController {
     async changeEmail(body, auth) {
         const token = auth?.replace(/^Bearer\s+/i, '');
         if (!token)
-            throw new common_1.BadRequestException('Missing token');
+            throw new common_1.UnauthorizedException('Missing token');
         const user = await this.authService.meFromToken(token);
         if (!user)
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.UnauthorizedException('Invalid token');
         const res = await this.usersService.changeMyEmail(user.id, body.newEmail, body.password);
         if (res === null)
             throw new common_1.BadRequestException('Current password invalid');

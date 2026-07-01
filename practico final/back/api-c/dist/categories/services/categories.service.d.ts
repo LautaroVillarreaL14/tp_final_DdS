@@ -7,5 +7,6 @@ export declare class CategoriesService {
     findAll(page: number, limit: number): Promise<PaginationResponse<Category>>;
     findById(id: number): Promise<Category | null>;
     create(input: CreateCategoryInput): Promise<Category>;
+    update(id: number, input: CreateCategoryInput): Promise<Category>;
     delete(id: number): Promise<void>;
 }

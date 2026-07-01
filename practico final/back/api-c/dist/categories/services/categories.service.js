@@ -27,11 +27,23 @@ let CategoriesService = class CategoriesService {
     async findById(id) {
         const categoriById = await this.categoriesRepository.findById(id);
         if (!categoriById)
-            throw new common_1.NotFoundException('404');
+            throw new common_1.NotFoundException('Category not found');
         return categoriById;
     }
     async create(input) {
+        const existing = await this.categoriesRepository.findByName(input.name);
+        if (existing)
+            throw new common_1.ConflictException('Category already exists');
         return this.categoriesRepository.create(input);
+    }
+    async update(id, input) {
+        const existing = await this.categoriesRepository.findByName(input.name);
+        if (existing && existing.id !== id)
+            throw new common_1.ConflictException('Category already exists');
+        const updated = await this.categoriesRepository.update(id, input);
+        if (!updated)
+            throw new common_1.NotFoundException('Category not found');
+        return updated;
     }
     async delete(id) {
         return this.categoriesRepository.delete(id);

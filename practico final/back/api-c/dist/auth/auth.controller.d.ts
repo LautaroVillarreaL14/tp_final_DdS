@@ -14,6 +14,7 @@ export declare class AuthController {
             id: any;
             email: any;
             emailVerified: any;
+            isVerified: any;
         };
     }>;
     login(body: LoginDto): Promise<{

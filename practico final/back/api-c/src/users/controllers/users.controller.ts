@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Body, Headers, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Body, Headers, NotFoundException, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { ExternalUser } from '../user.types';
 import { UsersService } from '../services/users.service';
 import { AuthService } from '../../auth/auth.service';
@@ -13,10 +13,10 @@ export class UsersController {
   @Get()
   async findAll(@Headers('authorization') auth?: string): Promise<ExternalUser[]> {
     const token = auth?.replace(/^Bearer\s+/i, '');
-    if (!token) throw new BadRequestException('Missing token');
+    if (!token) throw new UnauthorizedException('Missing token');
     const user = await this.authService.meFromToken(token);
-    if (!user) throw new NotFoundException('User not found');
-    if (user.role !== 'admin') throw new BadRequestException('Admin privilege required');
+    if (!user) throw new UnauthorizedException('Invalid token');
+    if (user.role !== 'admin') throw new ForbiddenException('Admin privilege required');
     return this.usersService.findAll();
   }
 
@@ -30,11 +30,12 @@ export class UsersController {
   @Patch(':id/role')
   async updateRole(@Param('id') id: string, @Body() body: UpdateRoleDto, @Headers('authorization') auth?: string) {
     const token = auth?.replace(/^Bearer\s+/i, '');
-    if (!token) throw new BadRequestException('Missing token');
+    if (!token) throw new UnauthorizedException('Missing token');
     const user = await this.authService.meFromToken(token);
-    if (!user) throw new NotFoundException('User not found');
-    if (user.role !== 'admin') throw new BadRequestException('Admin privilege required');
+    if (!user) throw new UnauthorizedException('Invalid token');
+    if (user.role !== 'admin') throw new ForbiddenException('Admin privilege required');
     if (!['user', 'admin'].includes(body.role)) throw new BadRequestException('Invalid role');
+    if (+id === user.id) throw new ForbiddenException('Cannot change your own role');
 
     const updated = await this.usersService.updateRole(+id, body.role);
     if (!updated) throw new NotFoundException('User not found');
@@ -44,9 +45,9 @@ export class UsersController {
   @Patch('me/password')
   async changePassword(@Body() body: ChangePasswordDto, @Headers('authorization') auth?: string) {
     const token = auth?.replace(/^Bearer\s+/i, '');
-    if (!token) throw new BadRequestException('Missing token');
+    if (!token) throw new UnauthorizedException('Missing token');
     const user = await this.authService.meFromToken(token);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new UnauthorizedException('Invalid token');
     const res = await this.usersService.changeMyPassword(user.id, body.currentPassword, body.newPassword);
     if (res === null) throw new BadRequestException('Current password invalid');
     return { message: 'Password updated' };
@@ -55,9 +56,9 @@ export class UsersController {
   @Patch('me/email')
   async changeEmail(@Body() body: ChangeEmailDto, @Headers('authorization') auth?: string) {
     const token = auth?.replace(/^Bearer\s+/i, '');
-    if (!token) throw new BadRequestException('Missing token');
+    if (!token) throw new UnauthorizedException('Missing token');
     const user = await this.authService.meFromToken(token);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new UnauthorizedException('Invalid token');
     const res = await this.usersService.changeMyEmail(user.id, body.newEmail, body.password);
     if (res === null) throw new BadRequestException('Current password invalid');
     // send verification email to new address

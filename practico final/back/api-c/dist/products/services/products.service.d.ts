@@ -11,4 +11,5 @@ export declare class ProductsService {
     remove(id: number): Promise<Product>;
     partialUpdate(id: number, data: Partial<Product>): Promise<Product | undefined>;
     updateStock(id: number, stock: number): Promise<Product | undefined>;
+    private enrichProduct;
 }

@@ -25,31 +25,42 @@ export class ProductsService {
   async findOne(id: number): Promise<Product> {
     const product = await this.productsRepository.findById(id);
     if (!product) throw new NotFoundException('Product not found');
-    return product;
+    return this.enrichProduct(product);
   }
 
   async create(input: CreateProductInput): Promise<Product> {
-    return this.productsRepository.create(input);
+    const created = await this.productsRepository.create(input);
+    return this.enrichProduct(created);
   }
 
   async update(id: number, input: UpdateProductInput): Promise<Product> {
     const product = await this.productsRepository.update(id, input);
     if (!product) throw new NotFoundException('Product not found');
-    return product;
+    return this.enrichProduct(product);
   }
 
   async remove(id: number): Promise<Product> {
     const product = await this.productsRepository.remove(id);
     if (!product) throw new NotFoundException('Product not found');
-    return product;
+    return this.enrichProduct(product);
   }
 
   async partialUpdate(id: number, data: Partial<Product>): Promise<Product | undefined> {
-    return this.productsRepository.partialUpdate(id,data);
+    const result = await this.productsRepository.partialUpdate(id,data);
+    return result ? this.enrichProduct(result) : undefined;
   }
 
   async updateStock(id: number, stock: number): Promise<Product | undefined>{
-    return this.productsRepository.updateStock(id, stock);
+    const result = await this.productsRepository.updateStock(id, stock);
+    return result ? this.enrichProduct(result) : undefined;
+  }
+
+  private enrichProduct(product: Product): Product {
+    const categoryId = (product as any).categoryId ?? 1;
+    return {
+      ...product,
+      category: categoryId ? { id: categoryId, name: `Category ${categoryId}` } : null,
+    } as Product;
   }
 }
 

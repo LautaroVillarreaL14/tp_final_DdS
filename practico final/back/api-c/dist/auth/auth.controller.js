@@ -35,7 +35,7 @@ let AuthController = class AuthController {
     async me(auth) {
         const token = auth?.replace(/^Bearer\s+/i, '');
         if (!token)
-            return null;
+            throw new common_1.UnauthorizedException('Missing token');
         return this.auth.meFromToken(token);
     }
     async verify(body) {
@@ -51,7 +51,7 @@ let AuthController = class AuthController {
             await this.auth.resendVerification(body.email);
             return { message: 'Email reenviado' };
         }
-        throw new common_1.BadRequestException('Missing token or email');
+        throw new common_1.UnauthorizedException('Missing token or email');
     }
     async requestReset(body) {
         await this.auth.requestPasswordReset(body.email);

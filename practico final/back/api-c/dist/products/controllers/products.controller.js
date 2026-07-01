@@ -17,10 +17,13 @@ const common_1 = require("@nestjs/common");
 const products_service_1 = require("../services/products.service");
 const create_product_input_1 = require("../DTOs/create.product.input");
 const update_product_input_1 = require("../DTOs/update.product.input");
+const auth_service_1 = require("../../auth/auth.service");
 let ProductsController = class ProductsController {
     productsService;
-    constructor(productsService) {
+    authService;
+    constructor(productsService, authService) {
         this.productsService = productsService;
+        this.authService = authService;
     }
     async findAll(page = 1, limit = 50) {
         const result = await this.productsService.findAll(page, limit);
@@ -34,17 +37,35 @@ let ProductsController = class ProductsController {
     findOne(id) {
         return this.productsService.findOne(Number(id));
     }
-    create(body) {
+    async create(body, auth) {
+        await this.requireAdmin(auth);
         return this.productsService.create(body);
     }
-    update(id, body) {
+    async update(id, body, auth) {
+        await this.requireAdmin(auth);
         return this.productsService.update(Number(id), body);
     }
-    remove(id) {
+    async remove(id, auth) {
+        await this.requireAdmin(auth);
         return this.productsService.remove(Number(id));
     }
     updateStock(id, stock) {
         return this.productsService.updateStock(id, stock);
+    }
+    async requireUser(auth) {
+        const token = auth?.replace(/^Bearer\s+/i, '');
+        if (!token)
+            throw new common_1.UnauthorizedException('Missing token');
+        const user = await this.authService.meFromToken(token);
+        if (!user)
+            throw new common_1.UnauthorizedException('Invalid token');
+        return user;
+    }
+    async requireAdmin(auth) {
+        const user = await this.requireUser(auth);
+        if (user.role !== 'admin')
+            throw new common_1.ForbiddenException('Admin privilege required');
+        return user;
     }
 };
 exports.ProductsController = ProductsController;
@@ -66,23 +87,26 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_product_input_1.CreateProductInput]),
+    __metadata("design:paramtypes", [create_product_input_1.CreateProductInput, String]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_product_input_1.UpdateProductInput]),
+    __metadata("design:paramtypes", [String, update_product_input_1.UpdateProductInput, String]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "remove", null);
 __decorate([
@@ -95,6 +119,7 @@ __decorate([
 ], ProductsController.prototype, "updateStock", null);
 exports.ProductsController = ProductsController = __decorate([
     (0, common_1.Controller)('products'),
-    __metadata("design:paramtypes", [products_service_1.ProductsService])
+    __metadata("design:paramtypes", [products_service_1.ProductsService,
+        auth_service_1.AuthService])
 ], ProductsController);
 //# sourceMappingURL=products.controller.js.map
