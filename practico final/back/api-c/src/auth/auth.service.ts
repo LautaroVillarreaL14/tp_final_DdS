@@ -66,7 +66,11 @@ export class AuthService {
     const token = randomUUID();
     const expiry = Date.now() + 1000 * 60 * 60 * 24; // 24h
 
-    await this.usersService.update(userId, { verificationToken: token, isVerified: false });
+    await this.usersService.update(userId, {
+      verificationToken: token,
+      verificationTokenExpires: expiry,
+      isVerified: false,
+    });
 
     const link = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/verify-email?token=${token}`;
     const html = `Pulsa el enlace para verificar tu email: <a href="${link}">${link}</a>`;
@@ -75,8 +79,15 @@ export class AuthService {
 
   async verifyEmail(tokenStr: string) {
     const user = await this.usersService.findByVerificationToken(tokenStr);
-    if (!user) throw new BadRequestException('Token inválido o expirado');
-    await this.usersService.update(user.id, { isVerified: true, emailVerified: true, verificationToken: null });
+    if (!user || !user.verificationTokenExpires || user.verificationTokenExpires < Date.now()) {
+      throw new BadRequestException('Token inválido o expirado');
+    }
+    await this.usersService.update(user.id, {
+      isVerified: true,
+      emailVerified: true,
+      verificationToken: null,
+      verificationTokenExpires: null,
+    });
     return { message: 'Email verificado correctamente' };
   }
 

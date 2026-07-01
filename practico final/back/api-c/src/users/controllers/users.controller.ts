@@ -1,23 +1,44 @@
 import { Controller, Get, Param, Patch, Body, Headers, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ExternalUser } from '../user.types';
 import { UsersService } from '../services/users.service';
-import { UsersGateway } from '../gateways/users.gateway';
 import { AuthService } from '../../auth/auth.service';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import { ChangeEmailDto } from '../dto/change-email.dto';
+import { UpdateRoleDto } from '../dto/update-role.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService, private readonly authService: AuthService) {}
 
   @Get()
-  findAll(): Promise<ExternalUser[]> {
+  async findAll(@Headers('authorization') auth?: string): Promise<ExternalUser[]> {
+    const token = auth?.replace(/^Bearer\s+/i, '');
+    if (!token) throw new BadRequestException('Missing token');
+    const user = await this.authService.meFromToken(token);
+    if (!user) throw new NotFoundException('User not found');
+    if (user.role !== 'admin') throw new BadRequestException('Admin privilege required');
     return this.usersService.findAll();
   }
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ExternalUser>{
-    return await this.usersService.findOne(+id)
 
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<ExternalUser> {
+    const user = await this.usersService.findOne(+id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  @Patch(':id/role')
+  async updateRole(@Param('id') id: string, @Body() body: UpdateRoleDto, @Headers('authorization') auth?: string) {
+    const token = auth?.replace(/^Bearer\s+/i, '');
+    if (!token) throw new BadRequestException('Missing token');
+    const user = await this.authService.meFromToken(token);
+    if (!user) throw new NotFoundException('User not found');
+    if (user.role !== 'admin') throw new BadRequestException('Admin privilege required');
+    if (!['user', 'admin'].includes(body.role)) throw new BadRequestException('Invalid role');
+
+    const updated = await this.usersService.updateRole(+id, body.role);
+    if (!updated) throw new NotFoundException('User not found');
+    return updated;
   }
 
   @Patch('me/password')

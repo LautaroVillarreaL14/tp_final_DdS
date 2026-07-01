@@ -23,6 +23,7 @@ let UserEntity = class UserEntity {
     verificationToken;
     resetPasswordToken;
     resetPasswordExpires;
+    verificationTokenExpires;
     createdAt;
 };
 exports.UserEntity = UserEntity;
@@ -70,6 +71,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'bigint', nullable: true }),
     __metadata("design:type", Number)
 ], UserEntity.prototype, "resetPasswordExpires", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'bigint', nullable: true }),
+    __metadata("design:type", Number)
+], UserEntity.prototype, "verificationTokenExpires", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

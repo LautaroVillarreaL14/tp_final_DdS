@@ -17,8 +17,8 @@ export class UsersService {
     }
   }
 
-  async findOne(id: number) : Promise<ExternalUser>{
-    return await this.usersGateway.findOne(id) 
+  async findOne(id: number): Promise<ExternalUser | undefined> {
+    return await this.usersGateway.findOne(id);
   }
 
   async findByEmail(email: string) {
@@ -47,6 +47,10 @@ export class UsersService {
     return await (this.usersGateway.update ? this.usersGateway.update(id, data) : undefined) as any;
   }
 
+  async updateRole(userId: number, role: string) {
+    return await this.update(userId, { role });
+  }
+
   async changeMyPassword(userId: number, currentPassword: string, newPassword: string) {
     // @ts-ignore
     const user = await (this.usersGateway.findOne ? this.usersGateway.findOne(userId) : undefined) as any;
@@ -65,7 +69,7 @@ export class UsersService {
     const bcrypt = require('bcrypt');
     const ok = await bcrypt.compare(password, user.password || '');
     if (!ok) return null;
-    return await (this.usersGateway.update ? this.usersGateway.update(userId, { email: newEmail, isVerified: false, verificationToken: null }) : undefined) as any;
+    return await (this.usersGateway.update ? this.usersGateway.update(userId, { email: newEmail, isVerified: false, emailVerified: false, verificationToken: null, verificationTokenExpires: null }) : undefined) as any;
   }
 }
 

@@ -8,6 +8,7 @@ export type ExternalUser = {
     emailVerified?: boolean;
     isVerified?: boolean;
     verificationToken?: string | null;
+    verificationTokenExpires?: number | null;
     resetPasswordToken?: string | null;
     resetPasswordExpires?: number | null;
 };

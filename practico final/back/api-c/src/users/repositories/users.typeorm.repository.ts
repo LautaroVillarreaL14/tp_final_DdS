@@ -12,12 +12,19 @@ export class UsersTypeOrmRepository implements UsersGateway {
     private repo: Repository<UserEntity>,
   ) {}
 
-  async fetchAll(): Promise<ExternalUser[]> {
-    return await this.repo.find();
+  private safeUser(user: ExternalUser): ExternalUser {
+    const { password, verificationToken, verificationTokenExpires, resetPasswordToken, resetPasswordExpires, ...rest } = user as any;
+    return rest as ExternalUser;
   }
 
-  async findOne(id: number): Promise<ExternalUser> {
-    return (await this.repo.findOneBy({ id: Number(id) })) as any;
+  async fetchAll(): Promise<ExternalUser[]> {
+    const users = await this.repo.find();
+    return users.map((user) => this.safeUser(user as any));
+  }
+
+  async findOne(id: number): Promise<ExternalUser | undefined> {
+    const user = (await this.repo.findOneBy({ id: Number(id) })) as any;
+    return user ? this.safeUser(user) : undefined;
   }
 
   async findByEmail(email: string) {
@@ -37,8 +44,9 @@ export class UsersTypeOrmRepository implements UsersGateway {
     return (await this.repo.save(ent)) as any;
   }
 
-  async update(id: string | number, data: Partial<ExternalUser>) {
+  async update(id: string | number, data: Partial<ExternalUser>): Promise<ExternalUser | undefined> {
     await this.repo.update(Number(id), data as any);
-    return (await this.repo.findOneBy({ id: Number(id) })) as any;
+    const user = (await this.repo.findOneBy({ id: Number(id) })) as any;
+    return user ? this.safeUser(user) : undefined;
   }
 }

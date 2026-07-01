@@ -22,11 +22,17 @@ let UsersTypeOrmRepository = class UsersTypeOrmRepository {
     constructor(repo) {
         this.repo = repo;
     }
+    safeUser(user) {
+        const { password, verificationToken, verificationTokenExpires, resetPasswordToken, resetPasswordExpires, ...rest } = user;
+        return rest;
+    }
     async fetchAll() {
-        return await this.repo.find();
+        const users = await this.repo.find();
+        return users.map((user) => this.safeUser(user));
     }
     async findOne(id) {
-        return (await this.repo.findOneBy({ id: Number(id) }));
+        const user = (await this.repo.findOneBy({ id: Number(id) }));
+        return user ? this.safeUser(user) : undefined;
     }
     async findByEmail(email) {
         return (await this.repo.findOne({ where: { email } }));
@@ -43,7 +49,8 @@ let UsersTypeOrmRepository = class UsersTypeOrmRepository {
     }
     async update(id, data) {
         await this.repo.update(Number(id), data);
-        return (await this.repo.findOneBy({ id: Number(id) }));
+        const user = (await this.repo.findOneBy({ id: Number(id) }));
+        return user ? this.safeUser(user) : undefined;
     }
 };
 exports.UsersTypeOrmRepository = UsersTypeOrmRepository;

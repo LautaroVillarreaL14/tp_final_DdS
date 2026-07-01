@@ -10,5 +10,6 @@ export declare class UserEntity {
     verificationToken: string;
     resetPasswordToken: string;
     resetPasswordExpires: number;
+    verificationTokenExpires: number;
     createdAt: Date;
 }

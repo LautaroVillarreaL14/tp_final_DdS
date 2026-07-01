@@ -35,6 +35,9 @@ export class UserEntity {
   @Column({ type: 'bigint', nullable: true })
   resetPasswordExpires: number;
 
+  @Column({ type: 'bigint', nullable: true })
+  verificationTokenExpires: number;
+
   @CreateDateColumn()
   createdAt: Date;
 }

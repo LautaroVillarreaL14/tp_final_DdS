@@ -46,6 +46,9 @@ let UsersService = class UsersService {
     async update(id, data) {
         return await (this.usersGateway.update ? this.usersGateway.update(id, data) : undefined);
     }
+    async updateRole(userId, role) {
+        return await this.update(userId, { role });
+    }
     async changeMyPassword(userId, currentPassword, newPassword) {
         const user = await (this.usersGateway.findOne ? this.usersGateway.findOne(userId) : undefined);
         if (!user)
@@ -65,7 +68,7 @@ let UsersService = class UsersService {
         const ok = await bcrypt.compare(password, user.password || '');
         if (!ok)
             return null;
-        return await (this.usersGateway.update ? this.usersGateway.update(userId, { email: newEmail, isVerified: false, verificationToken: null }) : undefined);
+        return await (this.usersGateway.update ? this.usersGateway.update(userId, { email: newEmail, isVerified: false, emailVerified: false, verificationToken: null, verificationTokenExpires: null }) : undefined);
     }
 };
 exports.UsersService = UsersService;

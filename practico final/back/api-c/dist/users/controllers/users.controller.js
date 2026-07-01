@@ -18,6 +18,7 @@ const users_service_1 = require("../services/users.service");
 const auth_service_1 = require("../../auth/auth.service");
 const change_password_dto_1 = require("../dto/change-password.dto");
 const change_email_dto_1 = require("../dto/change-email.dto");
+const update_role_dto_1 = require("../dto/update-role.dto");
 let UsersController = class UsersController {
     usersService;
     authService;
@@ -25,11 +26,38 @@ let UsersController = class UsersController {
         this.usersService = usersService;
         this.authService = authService;
     }
-    findAll() {
+    async findAll(auth) {
+        const token = auth?.replace(/^Bearer\s+/i, '');
+        if (!token)
+            throw new common_1.BadRequestException('Missing token');
+        const user = await this.authService.meFromToken(token);
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        if (user.role !== 'admin')
+            throw new common_1.BadRequestException('Admin privilege required');
         return this.usersService.findAll();
     }
     async findOne(id) {
-        return await this.usersService.findOne(+id);
+        const user = await this.usersService.findOne(+id);
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        return user;
+    }
+    async updateRole(id, body, auth) {
+        const token = auth?.replace(/^Bearer\s+/i, '');
+        if (!token)
+            throw new common_1.BadRequestException('Missing token');
+        const user = await this.authService.meFromToken(token);
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        if (user.role !== 'admin')
+            throw new common_1.BadRequestException('Admin privilege required');
+        if (!['user', 'admin'].includes(body.role))
+            throw new common_1.BadRequestException('Invalid role');
+        const updated = await this.usersService.updateRole(+id, body.role);
+        if (!updated)
+            throw new common_1.NotFoundException('User not found');
+        return updated;
     }
     async changePassword(body, auth) {
         const token = auth?.replace(/^Bearer\s+/i, '');
@@ -60,8 +88,9 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
@@ -71,6 +100,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id/role'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Headers)('authorization')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_role_dto_1.UpdateRoleDto, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateRole", null);
 __decorate([
     (0, common_1.Patch)('me/password'),
     __param(0, (0, common_1.Body)()),
