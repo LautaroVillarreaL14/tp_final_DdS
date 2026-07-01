@@ -22,8 +22,14 @@ let ProductsController = class ProductsController {
     constructor(productsService) {
         this.productsService = productsService;
     }
-    findAll(page = 1, limit = 50) {
-        return this.productsService.findAll(page, limit);
+    async findAll(page = 1, limit = 50) {
+        const result = await this.productsService.findAll(page, limit);
+        return {
+            items: result.data,
+            total: result.meta.total,
+            page: result.meta.page,
+            limit: result.meta.limit,
+        };
     }
     findOne(id) {
         return this.productsService.findOne(Number(id));
@@ -44,10 +50,10 @@ let ProductsController = class ProductsController {
 exports.ProductsController = ProductsController;
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('page')),
-    __param(1, (0, common_1.Query)('limit')),
+    __param(0, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(50), common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, Number]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "findAll", null);
 __decorate([

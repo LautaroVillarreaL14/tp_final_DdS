@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -22,8 +23,17 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query('page') page:number=1, @Query('limit') limit=50): Promise<PaginationResponse<Product>> {
-    return this.productsService.findAll(page,limit);
+  async findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number = 50,
+  ): Promise<any> {
+    const result = await this.productsService.findAll(page, limit);
+    return {
+      items: result.data,
+      total: result.meta.total,
+      page: result.meta.page,
+      limit: result.meta.limit,
+    };
   }
 
   @Get(':id')
