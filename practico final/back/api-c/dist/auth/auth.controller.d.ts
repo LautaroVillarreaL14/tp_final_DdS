@@ -10,12 +10,7 @@ export declare class AuthController {
     constructor(auth: AuthService);
     register(body: RegisterDto): Promise<{
         access_token: any;
-        user: {
-            id: any;
-            email: any;
-            emailVerified: any;
-            isVerified: any;
-        };
+        user: any;
     }>;
     login(body: LoginDto): Promise<{
         access_token: any;

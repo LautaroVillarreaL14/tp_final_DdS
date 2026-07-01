@@ -1,6 +1,13 @@
-import axios, { AxiosInstance } from "axios";
+import path from "path";
+import { fileURLToPath } from "url";
+import axios from "axios";
+import dotenv from "dotenv";
+import type { AxiosInstance } from "axios";
 
-const BASE_URL = process.env.API_C_URL || "http://localhost:3000";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
+
+dotenv.config({ path: path.resolve(__dirname, "..", "..", "back", "api-c", ".env") });
 
 class ApiClient {
   private client: AxiosInstance;
@@ -8,7 +15,7 @@ class ApiClient {
   private authPromise: Promise<void> | null = null;
 
   constructor() {
-    this.client = axios.create({ baseURL: BASE_URL });
+    this.client = axios.create({ baseURL: this.getBaseUrl() });
     this.client.interceptors.request.use((config) => {
       if (this.token) {
         config.headers = config.headers ?? {};
@@ -18,13 +25,23 @@ class ApiClient {
     });
   }
 
+  private getBaseUrl(): string {
+    return process.env.API_C_URL || "http://localhost:3000";
+  }
+
+  private getAuthCredentials(): { email?: string; password?: string } {
+    return {
+      email: process.env.API_C_EMAIL,
+      password: process.env.API_C_PASSWORD,
+    };
+  }
+
   private async ensureAuthenticated(): Promise<void> {
     if (this.token) return;
     if (this.authPromise) return this.authPromise;
 
     this.authPromise = (async () => {
-      const email = process.env.API_C_EMAIL;
-      const password = process.env.API_C_PASSWORD;
+      const { email, password } = this.getAuthCredentials();
 
       if (!email || !password) return;
 
@@ -75,8 +92,7 @@ class ApiClient {
   }
 
   async autoLogin(): Promise<boolean> {
-    const email = process.env.API_C_EMAIL;
-    const password = process.env.API_C_PASSWORD;
+    const { email, password } = this.getAuthCredentials();
     if (!email || !password) {
       return false;
     }

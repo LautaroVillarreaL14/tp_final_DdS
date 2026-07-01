@@ -6,12 +6,7 @@ export declare class AuthService {
     constructor(usersService: UsersService);
     register(email: string, password: string): Promise<{
         access_token: any;
-        user: {
-            id: any;
-            email: any;
-            emailVerified: any;
-            isVerified: any;
-        };
+        user: any;
     }>;
     private safeUser;
     login(email: string, password: string): Promise<{
